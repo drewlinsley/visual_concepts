@@ -1,0 +1,116 @@
+
+
+pwi_nearest,_,annotations_nearest,pwi_furthest,_,annotations_furthest = \
+ run_coco_finder(new_words,prepositions,nouns,caption_data,caption_ids,data,coco_all_images,my_captions,data_dir)
+
+
+
+def run_coco_finder(new_words,prepositions,nouns,caption_data,caption_ids,data,coco_all_images,my_captions,output_dir):
+	#1. Find frequency of words and list of prepositions in words
+	words_freq = Counter(new_words)
+	prep_idx, prep_count = preposition_count(new_words,prepositions);
+
+	#1a. do this for nouns too
+	noun_idx, noun_count = preposition_count(new_words,nouns);
+
+	#2. For each preposition, get the N most similar nouns
+	side = 'low'; #most
+	_, preposition_word_images, preposition_list, preposition_ids= \
+		find_nearest_sentences(caption_data,caption_ids,prep_count,prep_idx,noun_idx, noun_count, data,coco_all_images,new_words,my_captions,side);
+
+	#3. Save data
+	to_save = [preposition_word_images,\
+	preposition_list,preposition_ids]
+	names = ['preposition_word_images',\
+	'preposition_list','preposition_ids']
+	prepare_json_files(to_save,names,output_dir)
+
+	#4. And the N least similar nouns -- REFACTOR THIS CODE
+	side = 'high'; #least similar
+	_, least_preposition_word_images, least_preposition_list, least_preposition_ids= \
+		find_nearest_sentences(caption_data,caption_ids,prep_count,prep_idx,noun_idx, noun_count, data,coco_all_images,new_words,my_captions,side);
+
+	#5. Save data
+	to_save = [least_preposition_word_images,\
+	least_preposition_list,least_preposition_ids]
+	names = ['least_preposition_word_images',\
+	'least_preposition_list','least_preposition_ids']
+	prepare_json_files(to_save,names,output_dir)
+
+	return preposition_word_images, preposition_list, preposition_ids, least_preposition_word_images, least_preposition_list, least_preposition_ids
+
+
+
+
+def find_nearest_sentences(caption_data,caption_ids,prep_count,prep_idx,noun_idx,noun_count,data,coco_all_images,new_words,coco_all_captions,side):
+	#2. For each preposition, get the N most/least similar nouns
+	#a. precalculate distance between each preposition and all other words
+	if side == 'high': #high dissimilarity
+		side = -1
+		print('Using side ' + str(side))
+	else:
+		side = 1 #low dissimilarity
+		print('Using side ' + str(side))
+
+	preposition_word_matches = []
+	preposition_word_images = []
+	preposition_word_image_pointers = []
+	preposition_word_alt_image_pointers = []
+	preposition_ids = []
+	word_pos = []
+	prep_list = []
+	n = 50;
+	m = int(5*1e3);
+
+	#Find average animal vector
+	average_noun = np.zeros((data.shape[1]))
+	for idx in range(0,noun_idx.shape[0]):
+		average_noun += data[noun_idx[idx],:]
+	average_noun/=noun_idx.shape[0]
+
+	#1. Previously stored the image_ids of each sentence annotation [caption_ids]
+	#2. Unravel image ids from coco-images -- use these later for a lookup table
+	#3. For each nearest neighbor caption, coco_ids.index(caption_ids[nearest_neighbor[i]])
+	coco_ids = []
+	for idx in coco_all_images:
+		coco_ids.append(idx[u'id'])
+
+	#Evaluate argmax[1...N](sentences|prep) -- find the N most likely sentences given each preposition.
+	total_props = prep_count.shape[0]
+	for idx in range(0,total_props):
+		print('******Gathering nearest neighbors for preposition ' + str(idx) + '/' + str(total_props) + ': ' + new_words[prep_idx[idx]])
+		prep_list.append(new_words[prep_idx[idx]])
+		#First sort for visual content (nouns)
+		dm = np.empty((caption_data.shape[0]))
+		for il in range(0,caption_data.shape[0]):
+			dm[il] = dis.cosine(average_noun,caption_data[il])
+		nearest_nouns = np.argsort(dm[::-1])[:m]
+
+		#Choose the m best (lowest distance) then sort for the visual routine (verb/preposition)
+		dm = np.empty((nearest_nouns.shape[0]))
+		for il in range(0,nearest_nouns.shape[0]):
+			dm[il] = dis.cosine(data[prep_idx[idx],:],caption_data[nearest_nouns[il]])
+			#dm[0,il] = dis.cosine(np.mean([data[prep_idx[idx],:],average_noun],axis=0),\
+			#	caption_data[il])		###### Control for nouns around here... take mean or sum of noun plus the preposition
+		#1. For each preposition, find the POS of the nearest and furthest (Catch trials) n words 
+		nearest_ids = nearest_nouns[np.argsort(dm[::side])[:n]]
+		nearest_trans_ids = caption_ids[nearest_ids]
+		#Preallocate
+		it_word_matches = []
+		it_images = []
+		it_image_pointers = []
+		it_alt_image_pointers = []
+		it_word_pos = []
+		it_ids = []
+		for il in range(0,n):
+			im_id = coco_ids[coco_ids.index(nearest_trans_ids[il])] #WTF nearest_trans vs. nearest_ids
+			it_images.append(u'http://mscoco.org/images/' + str(im_id))
+			#it_images.append(u'http://mscoco.org/images/' + str(my_captions[nearest_ids[il]]))
+			####
+			#it_images.append(coco_all_images[im_id][u'file_name'])
+			#it_image_pointers.append(coco_all_images[im_id][u'flickr_url'])
+			#it_alt_image_pointers.append(coco_all_images[im_id][u'coco_url'])
+			it_ids.append(coco_all_captions[nearest_ids[il]])
+		preposition_word_images.append(it_images)
+		preposition_ids.append(it_ids)
+	return dm, preposition_word_images, prep_list, preposition_ids
