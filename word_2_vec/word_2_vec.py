@@ -178,6 +178,6 @@ def save_dic(dic, path, name):
         pickle.dump(dic, f, pickle.HIGHEST_PROTOCOL)
 
 save_dic(dictionary, path, 'dictionary')
-
+save_dic(reverse_dictionary, path, 'reverse_dictionary')
 np.save(os.path.join(path, 'embeddings.npy'), final_embeddings)
 
