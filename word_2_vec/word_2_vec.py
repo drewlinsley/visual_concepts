@@ -1,12 +1,14 @@
 from __future__ import print_function
-import collections, math, os, random, zipfile, string
-import numpy, tensorflow as np, tf
+import collections, math, os, random, zipfile, string, pickle
+import numpy as np
+import tensorflow as tf
 from matplotlib import pylab
 from six.moves import range
 from six.moves.urllib.request import urlretrieve
 from sklearn.manifold import TSNE
 
-path = "../../data/text_2.txt"
+path = "../../data/"
+name = "text_2.txt"
 
 def file_len(f):
     with open(path) as f:
@@ -14,7 +16,7 @@ def file_len(f):
             pass
         return i + 1
     
-def read_data(path, num_lines, nb_lines):
+def read_data(fname, num_lines, nb_lines):
   data = []
   if num_lines>nb_lines:
       num_lines = nb_lines
@@ -24,9 +26,9 @@ def read_data(path, num_lines, nb_lines):
         data.extend(f.readline().translate(string.maketrans("",""), string.punctuation)[:-1].split(" ")) 
   return data 
 
-nb_lines = file_len(path)
+nb_lines = file_len(os.path.join(path, name))
 
-words = read_data(path, int(1e6), nb_lines)
+words = read_data(os.path.join(path, name), int(1e6), nb_lines)
 
 vocabulary_size = 50000
 
@@ -169,3 +171,13 @@ with tf.Session(graph=graph) as session:
           log = '%s %s,' % (log, close_word)
         print(log)
   final_embeddings = normalized_embeddings.eval()
+
+# Save embeddings and dictionaries
+def save_dic(dic, path, name):
+    with open(os.path.join(path, name), 'wb') as f:
+        pickle.dump(dic, f, pickle.HIGHEST_PROTOCOL)
+
+save_dic(dictionary, path, 'dictionary')
+
+np.save(os.path.join(path, 'embeddings.npy'), final_embeddings)
+
