@@ -43,7 +43,7 @@ emb_cap_norm = np.divide(emb_cap, np.sqrt(np.sum(np.square(emb_cap), axis=1))[:,
 
 emb_cpt_norm = np.divide(emb_cpt, np.sqrt(np.sum(np.square(emb_cpt), axis=1)[:, np.newaxis]))
 
-similarity = np.dot(emb_cap_norm, emb_cpt.T)
+similarity = np.dot(emb_cap_norm, emb_cpt_norm.T)
 
 best_con = prep[np.argmax(similarity, axis=1)]
 
