@@ -10,8 +10,8 @@ from sklearn.manifold import TSNE
 path = "../../data/"
 name = "text_2.txt"
 
-def file_len(f):
-    with open(path) as f:
+def file_len(fname):
+    with open(fname) as f:
         for i, _ in enumerate(f):
             pass
         return i + 1
@@ -21,16 +21,17 @@ def read_data(fname, num_lines, nb_lines):
   if num_lines>nb_lines:
       num_lines = nb_lines
       print('too much lines')
-  with open(path, 'r') as f:
+  with open(fname, 'r') as f:
     for _ in range(num_lines):
         data.extend(f.readline().translate(string.maketrans("",""), string.punctuation)[:-1].split(" ")) 
   return data 
 
 nb_lines = file_len(os.path.join(path, name))
 
-words = read_data(os.path.join(path, name), int(1e6), nb_lines)
+words = read_data(os.path.join(path, name), int(1e7), nb_lines)
 
-vocabulary_size = 50000
+# English dictionary 171,476 words + 47,156 obsoletes
+vocabulary_size = 200000
 
 def build_dataset(words):
   count = [['UNK', -1]]
@@ -84,7 +85,7 @@ def generate_batch(batch_size, num_skips, skip_window):
 
 print('data:', [reverse_dictionary[di] for di in data[:100]])
 
-for num_skips, skip_window in [(2, 1), ]:
+for num_skips, skip_window in [(4, 2), ]:
     data_index = 0
     batch, labels = generate_batch(batch_size=8, num_skips=num_skips, skip_window=skip_window)
     print('\nwith num_skips = %d and skip_window = %d:' % (num_skips, skip_window))

@@ -17,14 +17,15 @@ annIds = coco_caps.getAnnIds()
 bc = np.loadtxt(os.path.join(path, 'best_concepts.txt'), type('str'))
 
 # load image and display + annotation + concept
-nim = 2
-ann = coco_caps.loadAnns(annIds)[nim]
-img = coco_caps.loadImgs(ann['image_id'])[0]
-I = io.imread(os.path.join(path, 'coco', 'train2014', img['file_name']))
-plt.imshow(I)
-plt.axis('off')
-plt.savefig(os.path.join(path, 'imgs', 'imgs.png'))
-coco_caps.showAnns([ann])
-print(bc[nim])
+for nim in range(10):
+    print(nim)
+    ann = coco_caps.loadAnns(annIds)[nim]
+    img = coco_caps.loadImgs(ann['image_id'])[0]
+    I = io.imread(os.path.join(path, 'coco', 'train2014', img['file_name']))
+    plt.imshow(I)
+    plt.axis('off')
+    plt.savefig(os.path.join(path, 'imgs', 'imgs_'+str(nim)+'.png'))
+    sts = coco_caps.showAnns([ann])
+    print(bc[nim])
 
 
