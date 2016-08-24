@@ -44,12 +44,13 @@ for cat in cats:
     emb_cap_norm = np.divide(emb_cap, np.sqrt(np.sum(np.square(emb_cap), axis=1))[:, np.newaxis])
     emb_cpt_norm = np.divide(emb_cpt, np.sqrt(np.sum(np.square(emb_cpt), axis=1)[:, np.newaxis]))
     similarity = np.dot(emb_cap_norm, emb_cpt_norm.T)
+    os.mkdir(os.path.join(path, cat))
     for ind in range(similarity.shape[1]):
         ind_best = np.argsort(np.find(np.argmax(similarity, axis=1)==ind))
         best_con = prep[ind_best]
         best_caps = anns[ind_best]
         os.mkdir(os.path.join(path, ind))
-        np.savetxt(os.path.join(path, ind, 'best_concepts_'+prep[ind]+'.txt'), best_con.astype('str'), fmt='%s')
-        np.savetxt(os.path.join(path, ind, 'best_captions_'+prep[ind]+'.txt'), best_con.astype('str'), fmt='%s')
+        np.savetxt(os.path.join(path, cat, ind, 'best_concepts_'+prep[ind]+'.txt'), best_con.astype('str'), fmt='%s')
+        np.savetxt(os.path.join(path, cat, ind, 'best_captions_'+prep[ind]+'.txt'), best_con.astype('str'), fmt='%s')
         img = coco_caps.loadImgs(anns[ind_best]['image_id'])[0]
-        shutil.copyfile(os.path.join(path, 'coco', 'train2014', img['file_name'], os.path.join(path, ind, img['file_name'])
+        shutil.copyfile(os.path.join(path, 'coco', 'train2014', img['file_name'], os.path.join(path, cat, ind, img['file_name'])
