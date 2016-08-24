@@ -1,46 +1,62 @@
-# These are all the modules we'll be using later. Make sure you can import them
-# before proceeding further.
-%matplotlib inline
 from __future__ import print_function
-import collections
-import math
+import collections, math, os, random, zipfile, string, pickle
 import numpy as np
-import os
-import random
 import tensorflow as tf
-import zipfile
 from matplotlib import pylab
 from six.moves import range
 from six.moves.urllib.request import urlretrieve
 from sklearn.manifold import TSNE
 
-path = "../../data/"
-name = "text_2.txt"
+text_corpus = 'drew'
 
-url = 'http://mattmahoney.net/dc/'
+if text_corpus=='text_8':
+    url = 'http://mattmahoney.net/dc/'
 
-def maybe_download(filename, expected_bytes):
-  """Download a file if not present, and make sure it's the right size."""
-  if not os.path.exists(filename):
-    filename, _ = urlretrieve(url + filename, filename)
-  statinfo = os.stat(filename)
-  if statinfo.st_size == expected_bytes:
-    print('Found and verified %s' % filename)
-  else:
-    print(statinfo.st_size)
-    raise Exception(
-      'Failed to verify ' + filename + '. Can you get to it with a browser?')
-  return filename
+    def maybe_download(filename, expected_bytes):
+      if not os.path.exists(filename):
+        filename, _ = urlretrieve(url + filename, filename)
+      statinfo = os.stat(filename)
+      if statinfo.st_size == expected_bytes:
+        print('Found and verified %s' % filename)
+      else:
+        print(statinfo.st_size)
+        raise Exception(
+          'Failed to verify ' + filename + '. Can you get to it with a browser?')
+      return filename
 
-filename = maybe_download('text8.zip', 31344016)
-    
-def read_data(filename):
-  """Extract the first file enclosed in a zip file as a list of words"""
-  with zipfile.ZipFile(filename) as f:
-    data = tf.compat.as_str(f.read(f.namelist()[0])).split()
-  return data
-  
-words = read_data(filename)
+    filename = maybe_download('text8.zip', 31344016)
+        
+    def read_data(filename):
+      with zipfile.ZipFile(filename) as f:
+        data = tf.compat.as_str(f.read(f.namelist()[0])).split()
+      return data
+
+    filename = maybe_download('text8.zip', 31344016)
+    words = read_data(filename)
+
+elif text_corpus=='drew':
+
+    def file_len(fname):
+        with open(fname) as f:
+            for i, _ in enumerate(f):
+                pass
+            return i + 1
+
+    def read_data(fname, num_lines, nb_lines):
+      data = []
+      if num_lines>nb_lines:
+          num_lines = nb_lines
+          print('too much lines')
+      with open(fname, 'r') as f:
+        for _ in range(num_lines):
+            data.extend(f.readline().translate(string.maketrans("",""), string.punctuation)[:-1].split(" ")) 
+      return data 
+
+    path = "../../data/"
+    name = "text_2.txt"
+    nb_lines = file_len(os.path.join(path, name))
+    words = read_data(os.path.join(path, name), int(1e7), nb_lines)
+
 print('Data size %d' % len(words))
 
 # English dictionary 171,476 words + 47,156 obsoletes
@@ -160,7 +176,7 @@ with graph.as_default(): #, tf.device('/cpu:0'):
   similarity = tf.matmul(valid_embeddings, tf.transpose(normalized_embeddings))
 
 
-num_steps = 100001
+num_steps = 200001
 
 with tf.Session(graph=graph) as session:
   tf.initialize_all_variables().run()
@@ -197,6 +213,6 @@ def save_dic(dic, path, name):
     with open(os.path.join(path, name), 'wb') as f:
         pickle.dump(dic, f, pickle.HIGHEST_PROTOCOL)
 
-save_dic(dictionary, path, 'dictionary')
-save_dic(reverse_dictionary, path, 'reverse_dictionary')
-np.save(os.path.join(path, 'embeddings.npy'), final_embeddings)
+save_dic(dictionary, path, 'dictionary_cbow')
+save_dic(reverse_dictionary, path, 'reverse_dictionary_cbow')
+np.save(os.path.join(path, 'embeddings_cbow.npy'), final_embeddings)

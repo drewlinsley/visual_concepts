@@ -6,15 +6,21 @@ import string
 
 path = "../../data/"
 num_ex = 50
+train_type = 'cbow'
 
 # Load embeddings
 def load_dic(path, name):
     with open(os.path.join(path, name), 'rb') as f:
         return pickle.load(f)
 
-emb = np.load(os.path.join(path, "embeddings.npy"))
-dic = load_dic(path, 'dictionary')
-rdic = load_dic(path, 'reverse_dictionary')
+if train_type=='skip_gram':
+    emb = np.load(os.path.join(path, "embeddings.npy"))
+    dic = load_dic(path, 'dictionary')
+    rdic = load_dic(path, 'reverse_dictionary')
+elif train_type=='cbow':
+    emb = np.load(os.path.join(path, "embeddings_cbow.npy"))
+    dic = load_dic(path, 'dictionary_cbow')
+    rdic = load_dic(path, 'reverse_dictionary_cbow')
 
 # Find embedding for chosen concepts
 prep = np.loadtxt('../prob_word_lists/prepositions.csv', type('str'))
