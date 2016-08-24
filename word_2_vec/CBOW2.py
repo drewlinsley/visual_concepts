@@ -24,7 +24,7 @@ if text_corpus=='text_8':
           'Failed to verify ' + filename + '. Can you get to it with a browser?')
       return filename
 
-    filename = maybe_download('text8.zip', 31344016)
+    filename = maybe_download('text9.zip', 31344016)
         
     def read_data(filename):
       with zipfile.ZipFile(filename) as f:
