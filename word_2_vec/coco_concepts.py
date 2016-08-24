@@ -2,6 +2,7 @@ import os, sys, pickle, shutil
 import numpy as np
 sys.path.append('../../coco/PythonAPI')
 from pycocotools.coco import COCO
+import string
 
 path = "../../data/"
 num_ex = 50
@@ -17,7 +18,7 @@ rdic = load_dic(path, 'reverse_dictionary')
 
 # Find embedding for chosen concepts
 prep = np.loadtxt('../prob_word_lists/prepositions.csv', type('str'))
-prep_verb = np.loadtxt('../prob_word_lists/prepositions_verbs.csv', type('str'))
+prep = np.loadtxt('../prob_word_lists/prepositions_verbs.csv', type('str'))
 
 word_index = []
 for word in prep:
@@ -26,33 +27,58 @@ emb_cpt = emb[word_index]
 
 # Find average embedding for each caption of COCO images in each category
 coco_caps = COCO(os.path.join(path, 'coco', 'annotations', 'captions_train2014.json'))
-cats = coco_caps.loadCats(coco_caps.getCatIds())
+coco_anns = COCO(os.path.join(path, 'coco', 'annotations', 'instances_train2014.json'))
+
+cats = coco_anns.getCatIds()
+cats_name = coco_anns.loadCats(cats)
+
 for cat in cats:
-    annIds = coco_caps.getAnnIds(catIds=cat)
-    anns = coco_caps.loadAnns(annIds)
-    # taking the mean of each caption in the embedding space and  stacking in an array
-    emb_cap = []
-    for ann in anns:
-        lann = ann['caption'].split(' ')
-        lind = []
-        for wi in lann:
-            try:
-                lind.append(dic[wi])
-            except KeyError:
-                print(wi + ' not in dictionary')
-        emb_cap.append(np.mean(emb[lind], axis=0))
+    print cat
+    imIds = coco_anns.getImgIds(catIds=cat)
+    emb_cap, limIds, lannIds = [], [], []
+    for imId in imIds:
+        annIds = coco_caps.getAnnIds(imgIds=imId)
+        lannIds.extend(annIds)
+        anns = coco_caps.loadAnns(annIds)
+        # taking the mean of each caption in the embedding space and stacking it into an array
+        for iann, ann in enumerate(anns):
+            lann = str(ann['caption']).translate(string.maketrans("",""), string.punctuation).split(' ')
+            lind = []
+            for wi in lann:
+                try:
+                    lind.append(dic[wi.lower().replace(" ","").replace("\n","")])
+                except KeyError:
+                    #print(wi.lower() + ' not in dictionary')
+                    pass
+            if lind==[]:raise ValueError('list empty because no words of the caption is in the dictionary')
+            emb_cap.append(np.mean(emb[lind], axis=0))
+            limIds.append(imId)
+            
+
     emb_cap = np.array(emb_cap)
     # compute the cosine distance between concepts and captions
-    emb_cap_norm = np.divide(emb_cap, np.sqrt(np.sum(np.square(emb_cap), axis=1))[:, np.newaxis])
+    emb_cap_norm = np.divide(emb_cap, np.sqrt(np.sum(np.square(emb_cap), axis=1)[:, np.newaxis]))
     emb_cpt_norm = np.divide(emb_cpt, np.sqrt(np.sum(np.square(emb_cpt), axis=1)[:, np.newaxis]))
     similarity = np.dot(emb_cap_norm, emb_cpt_norm.T)
-    os.mkdir(os.path.join(path, cat))
+    path_cat = os.path.join(path, 'imgs', coco_anns.loadCats(cat)[0]['name'])
+    try:
+        os.mkdir(path_cat)
+    except OSError:
+        print('directory already exists')
     for ind in range(similarity.shape[1]):
-        ind_best = np.argsort(np.find(np.argmax(similarity, axis=1)==ind))
-        best_con = prep[ind_best]
-        best_caps = anns[ind_best]
-        os.mkdir(os.path.join(path, ind))
-        np.savetxt(os.path.join(path, cat, ind, 'best_concepts_'+prep[ind]+'.txt'), best_con.astype('str'), fmt='%s')
-        np.savetxt(os.path.join(path, cat, ind, 'best_captions_'+prep[ind]+'.txt'), best_con.astype('str'), fmt='%s')
-        img = coco_caps.loadImgs(anns[ind_best]['image_id'])[0]
-        shutil.copyfile(os.path.join(path, 'coco', 'train2014', img['file_name'], os.path.join(path, cat, ind, img['file_name'])
+        path_ind = os.path.join(path_cat, prep[ind])
+        con_best = np.argmax(similarity, axis=1) 
+        ind_similarity = np.nonzero(con_best==ind)[0]
+        ind_best = ind_similarity[np.argsort(similarity[ind_similarity, 0])[-num_ex:]]
+        best_caps = coco_caps.loadAnns(list(np.array(lannIds)[ind_best]))
+        imgs = coco_caps.loadImgs(list(np.array(limIds)[ind_best]))
+        try:
+            os.mkdir(path_ind)
+        except OSError:
+            print('directory already exists')
+        with open(os.path.join(path_ind, 'best_captions_'+prep[ind]+'.txt'), 'wb') as f:
+            for cap in reversed(best_caps):
+                f.write(cap['caption'])
+                f.write('\n')
+        for iimg, img in enumerate(reversed(imgs)):
+            shutil.copyfile(os.path.join(path, 'coco', 'train2014', img['file_name']), os.path.join(path_ind, str(iimg) + '.jpg'))
