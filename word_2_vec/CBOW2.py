@@ -122,9 +122,9 @@ for skip_window in [2, 1]:
     print('    labels:', [reverse_dictionary[li] for li in labels.reshape(8)])
 
 batch_size = 128
-embedding_size = 128 # Dimension of the embedding vector.
+embedding_size = 256 # Dimension of the embedding vector.
 # NOTE: Maybe consider caption average caption length?
-skip_window = 4 # How many words to consider left and right.
+skip_window = 6 # How many words to consider left and right.
 # We pick a random validation set to sample nearest neighbors. here we limit the
 # validation samples to the words that have a low numeric ID, which by
 # construction are also the most frequent. 
@@ -132,6 +132,7 @@ valid_size = 16 # Random set of words to evaluate similarity on.
 valid_window = 100 # Only pick dev samples in the head of the distribution.
 valid_examples = np.array(random.sample(range(valid_window), valid_size))
 num_sampled = 64 # Number of negative examples to sample.
+hidden_size = 128
 
 graph = tf.Graph()
 
@@ -145,18 +146,25 @@ with graph.as_default(): #, tf.device('/cpu:0'):
   # Variables.
   embeddings = tf.Variable(
     tf.random_uniform([vocabulary_size, embedding_size], -1.0, 1.0))
-  softmax_weights = tf.Variable(
-    tf.truncated_normal([vocabulary_size, embedding_size],
+
+  hidden_weights = tf.Variable(
+    tf.truncated_normal([embedding_size, hidden_size],
                          stddev=1.0 / math.sqrt(embedding_size)))
-  softmax_biases = tf.Variable(tf.zeros([vocabulary_size]))
+  hidden_biases = tf.Variable(tf.zeros([hidden_size]))
   
+  softmax_weights = tf.Variable(
+    tf.truncated_normal([vocabulary_size, hidden_size],
+                         stddev=1.0 / math.sqrt(hidden_size)))
+  softmax_biases = tf.Variable(tf.zeros([vocabulary_size]))
   # Model.
   # Look up embeddings for inputs.
-  # new in CBOW: find mean of all surround words' embeddings
   embed = tf.reduce_mean(tf.nn.embedding_lookup(embeddings, train_dataset),1)
+  # compute hidden layer
+  embed2 = tf.nn.relu(tf.matmul(embed,hidden_weights)+hidden_biases)
+    
   # Compute the softmax loss, using a sample of the negative labels each time.
   loss = tf.reduce_mean(
-    tf.nn.sampled_softmax_loss(softmax_weights, softmax_biases, embed,
+    tf.nn.sampled_softmax_loss(softmax_weights, softmax_biases, embed2,
                                train_labels, num_sampled, vocabulary_size))
 
   # Optimizer.
