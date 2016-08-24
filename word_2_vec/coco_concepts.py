@@ -74,10 +74,15 @@ for cat in cats:
     for ind in range(similarity.shape[1]):
         path_ind = os.path.join(path_cat, prep[ind])
         con_best = np.argmax(similarity, axis=1) 
-        ind_similarity = np.nonzero(con_best==ind)[0]
-        ind_best = ind_similarity[np.argsort(similarity[ind_similarity, 0])[-num_ex:]]
+        con_worst = np.argmin(similarity, axis=1) 
+        ind_best_similarity = np.nonzero(con_best==ind)[0]
+        ind_worst_similarity = np.nonzero(con_worst==ind)[0]
+        ind_best = ind_best_similarity[np.argsort(similarity[ind_best_similarity, 0])[-num_ex:]]
+        ind_worst = ind_worst_similarity[np.argsort(similarity[ind_worst_similarity, 0])[:num_ex]]
         best_caps = coco_caps.loadAnns(list(np.array(lannIds)[ind_best]))
-        imgs = coco_caps.loadImgs(list(np.array(limIds)[ind_best]))
+        worst_caps = coco_caps.loadAnns(list(np.array(lannIds)[ind_worst]))
+        best_imgs = coco_caps.loadImgs(list(np.array(limIds)[ind_best]))
+        worst_imgs = coco_caps.loadImgs(list(np.array(limIds)[ind_worst]))
         try:
             os.mkdir(path_ind)
         except OSError:
@@ -86,5 +91,11 @@ for cat in cats:
             for cap in reversed(best_caps):
                 f.write(cap['caption'])
                 f.write('\n')
-        for iimg, img in enumerate(reversed(imgs)):
-            shutil.copyfile(os.path.join(path, 'coco', 'train2014', img['file_name']), os.path.join(path_ind, str(iimg) + '.jpg'))
+        with open(os.path.join(path_ind, 'worst_captions_'+prep[ind]+'.txt'), 'wb') as f:
+            for cap in worst_caps:
+                f.write(cap['caption'])
+                f.write('\n')
+        for iimg, img in enumerate(reversed(best_imgs)):
+            shutil.copyfile(os.path.join(path, 'coco', 'train2014', img['file_name']), os.path.join(path_ind, 'best_' + str(iimg) + '.jpg'))
+        for iimg, img in enumerate(worst_imgs):
+            shutil.copyfile(os.path.join(path, 'coco', 'train2014', img['file_name']), os.path.join(path_ind, 'worst_' + str(iimg) + '.jpg'))
