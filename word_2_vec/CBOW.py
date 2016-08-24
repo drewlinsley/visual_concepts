@@ -76,7 +76,7 @@ data_index = 0
 def generate_batch(batch_size, skip_window):
   global data_index
   span = 2 * skip_window + 1 # [ skip_window target skip_window ]
-  batch = np.ndarray(shape=(batch_size,span-1), dtype=np.int32)
+  batch = np.ndarray(shape=(batch_size,span-1), dtype=np.int32)#batch is now words surrounding each target word
   labels = np.ndarray(shape=(batch_size, 1), dtype=np.int32)
   buffer = collections.deque(maxlen=span)
   for _ in range(span):
@@ -85,8 +85,10 @@ def generate_batch(batch_size, skip_window):
   for i in range(batch_size):
     target = skip_window  # target label at the center of the buffer
     for j in range(span):
+      #adds words before target to batch
       if j < skip_window:
         batch[i, j] = buffer[j]
+      #adds words after target to batch
       elif j > skip_window:
         batch[i, j-1] = buffer[j]
     labels[i, 0] = buffer[target]
@@ -134,8 +136,8 @@ with graph.as_default(): #, tf.device('/cpu:0'):
   
   # Model.
   # Look up embeddings for inputs.
+  # new in CBOW: find mean of all surround words' embeddings
   embed = tf.reduce_mean(tf.nn.embedding_lookup(embeddings, train_dataset),1)
-  print(embed)
   # Compute the softmax loss, using a sample of the negative labels each time.
   loss = tf.reduce_mean(
     tf.nn.sampled_softmax_loss(softmax_weights, softmax_biases, embed,
