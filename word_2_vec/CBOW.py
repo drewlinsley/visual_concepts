@@ -9,7 +9,7 @@ from sklearn.manifold import TSNE
 
 text_corpus = 'drew'
 
-if text_corpus=='text_8':
+if text_corpus=='text_9':
     url = 'http://mattmahoney.net/dc/'
 
     def maybe_download(filename, expected_bytes):
@@ -23,15 +23,14 @@ if text_corpus=='text_8':
         raise Exception(
           'Failed to verify ' + filename + '. Can you get to it with a browser?')
       return filename
-
-    filename = maybe_download('text9.zip', 31344016)
+    # THIS MIGHT NOT WORK:
+    filename = maybe_download('text9.zip', 322592222)
         
     def read_data(filename):
       with zipfile.ZipFile(filename) as f:
         data = tf.compat.as_str(f.read(f.namelist()[0])).split()
       return data
 
-    filename = maybe_download('text8.zip', 31344016)
     words = read_data(filename)
 
 elif text_corpus=='drew':
