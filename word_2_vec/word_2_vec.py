@@ -141,7 +141,7 @@ with graph.as_default(), tf.device('/cpu:0'):
   similarity = tf.matmul(valid_embeddings, tf.transpose(normalized_embeddings))
 
 
-num_steps = 100001
+num_steps = 200001
 
 with tf.Session(graph=graph) as session:
   tf.initialize_all_variables().run()

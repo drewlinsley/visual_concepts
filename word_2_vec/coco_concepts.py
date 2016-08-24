@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, pickle
 import numpy as np
 sys.path.append('../../coco/PythonAPI')
 from pycocotools.coco import COCO
@@ -16,6 +16,8 @@ rdic = load_dic(path, 'reverse_dictionary')
 
 # Find embedding for chosen concepts
 prep = np.loadtxt('../prob_word_lists/prepositions.csv', type('str'))
+prep_verb = np.loadtxt('../prob_word_lists/prepositions_verbs.csv', type('str'))
+
 word_index = []
 for word in prep:
     word_index.append(dic[word])
@@ -27,7 +29,7 @@ annIds = coco_caps.getAnnIds()
 anns = coco_caps.loadAnns(annIds)
 
 emb_cap = []
-for ann in anns[0:50]:
+for ann in anns[0:100]:
     lann = ann['caption'].split(' ')
     lind = []
     for wi in lann:
@@ -40,11 +42,7 @@ emb_cap = np.array(emb_cap)
 
 # compute the cosine distance between concepts and captions
 emb_cap_norm = np.divide(emb_cap, np.sqrt(np.sum(np.square(emb_cap), axis=1))[:, np.newaxis])
-
 emb_cpt_norm = np.divide(emb_cpt, np.sqrt(np.sum(np.square(emb_cpt), axis=1)[:, np.newaxis]))
-
-similarity = np.dot(emb_cap_norm, emb_cpt.T)
-
+similarity = np.dot(emb_cap_norm, emb_cpt_norm.T)
 best_con = prep[np.argmax(similarity, axis=1)]
-
 np.savetxt(os.path.join(path, 'best_concepts.txt'), best_con.astype('str'), fmt='%s')

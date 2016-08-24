@@ -8,7 +8,6 @@ from pycocotools.coco import COCO
 import skimage.io as io
 
 path = "../../data/"
-
 # load caption and images ids
 coco_caps = COCO(os.path.join(path, 'coco', 'annotations', 'captions_train2014.json'))
 annIds = coco_caps.getAnnIds()
