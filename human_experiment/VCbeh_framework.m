@@ -36,12 +36,9 @@ WaitSecs(1);
 %% Specify experiment parameters 
 
 % -- EDIT FILEPATHS ('exp_images' won't be necessary later) ------------- % 
-% negpath = '...negative_examples/exp_images';
-% pospath = '...positive_examples/exp_images';
-% instructpath = '...instructions.jpg';
-negpath = '/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/negative_examples/exp_images';
-pospath = '/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/positive_examples/exp_images';
-instructpath = '/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/instructions.jpg';
+negpath = '...negative_examples/exp_images';
+pospath = '...positive_examples/exp_images';
+instructpath = '...instructions.jpg';
 % ----------------------------------------------------------------------- % 
 
 % -- ADJUST AS NECESSARY  ----------------------------------------------- % 
