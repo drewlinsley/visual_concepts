@@ -221,6 +221,6 @@ def save_dic(dic, path, name):
     with open(os.path.join(path, name), 'wb') as f:
         pickle.dump(dic, f, pickle.HIGHEST_PROTOCOL)
 
-save_dic(dictionary, path, 'dictionary_cbow')
-save_dic(reverse_dictionary, path, 'reverse_dictionary_cbow')
-np.save(os.path.join(path, 'embeddings_cbow.npy'), final_embeddings)
+save_dic(dictionary, path, 'dictionary_cbow2')
+save_dic(reverse_dictionary, path, 'reverse_dictionary_cbow2')
+np.save(os.path.join(path, 'embeddings_cbow2.npy'), final_embeddings)
