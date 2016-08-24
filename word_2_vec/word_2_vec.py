@@ -10,31 +10,25 @@ from sklearn.manifold import TSNE
 path = "../../data/"
 name = "text_2.txt"
 
-url = 'http://mattmahoney.net/dc/'
-
-def maybe_download(filename, expected_bytes):
-  """Download a file if not present, and make sure it's the right size."""
-  if not os.path.exists(filename):
-    filename, _ = urlretrieve(url + filename, filename)
-  statinfo = os.stat(filename)
-  if statinfo.st_size == expected_bytes:
-    print('Found and verified %s' % filename)
-  else:
-    print(statinfo.st_size)
-    raise Exception(
-      'Failed to verify ' + filename + '. Can you get to it with a browser?')
-  return filename
-
-filename = maybe_download('text8.zip', 31344016)
+def file_len(fname):
+    with open(fname) as f:
+        for i, _ in enumerate(f):
+            pass
+        return i + 1
     
-def read_data(filename):
-  """Extract the first file enclosed in a zip file as a list of words"""
-  with zipfile.ZipFile(filename) as f:
-    data = tf.compat.as_str(f.read(f.namelist()[0])).split()
-  return data
-  
-words = read_data(filename)
-print('Data size %d' % len(words))
+def read_data(fname, num_lines, nb_lines):
+  data = []
+  if num_lines>nb_lines:
+      num_lines = nb_lines
+      print('too much lines')
+  with open(fname, 'r') as f:
+    for _ in range(num_lines):
+        data.extend(f.readline().translate(string.maketrans("",""), string.punctuation)[:-1].split(" ")) 
+  return data 
+
+nb_lines = file_len(os.path.join(path, name))
+
+words = read_data(os.path.join(path, name), int(1e7), nb_lines)
 
 # English dictionary 171,476 words + 47,156 obsoletes
 vocabulary_size = 200000
