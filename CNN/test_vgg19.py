@@ -2,30 +2,46 @@ import numpy as np
 import tensorflow as tf
 from sklearn import svm
 import vgg19
-import utils
+import os
+from skimage import io, transform 
 
-# get the probabilities for all data related to a concept
-"""
-img1 = utils.load_image("./test_data/tiger.jpeg")
-img2 = utils.load_image("./test_data/puzzle.jpeg")
-"""
+# returns image of shape [224, 224, 3]
+# [height, width, depth]
+def load_image(path):
+    # load image
+    img = skimage.io.imread(path)
+    img = img / 255.0
+    assert (0 <= img).all() and (img <= 1.0).all()
+    # print "Original Image Shape: ", img.shape
+    # we crop image from center
+    short_edge = min(img.shape[:2])
+    yy = int((img.shape[0] - short_edge) / 2)
+    xx = int((img.shape[1] - short_edge) / 2)
+    crop_img = img[yy: yy + short_edge, xx: xx + short_edge]
+    # resize to 224, 224
+    resized_img = skimage.transform.resize(crop_img, (224, 224))
+    return resized_img
 
-batch1 = img1.reshape((1, 224, 224, 3))
-batch2 = img2.reshape((1, 224, 224, 3))
-
-batch = np.concatenate((batch1, batch2), 0)
+path = "/home/tim/data/examples/dog_positive/aboard/"
+imgs_pos = np.array([load_image(os.path.join(path, f)) for f in os.listdir(path)])
+path = "/home/tim/data/examples/dog_negative/aboard/"
+imgs_neg = np.array([load_image(os.path.join(path, f)) for f in os.listdir(path)])
+batch = np.concatenate((imgs_pos, imgs_neg), 0)
+labs = np.concatenate((np.ones((imgs_pos.shape[0], )), np.zeros((imgs_neg.shape[0])))).astype(int)
 
 with tf.Session(
         config=tf.ConfigProto(gpu_options=(tf.GPUOptions(per_process_gpu_memory_fraction=0.7)))) as sess:
-    images = tf.placeholder("float", [2, 224, 224, 3])
+    images = tf.placeholder("float", batch.shape)
     feed_dict = {images: batch}
-
-    vgg = vgg19.Vgg19()
+    vgg = vgg19.Vgg19("/home/tim/data/vgg19.npy")
     with tf.name_scope("content_vgg"):
         vgg.build(images)
-
-    prob = sess.run(vgg.prob, feed_dict=feed_dict)
-    print(prob)
+    fc8 = sess.run(vgg.prob, feed_dict=feed_dict)
 
 # train a svm on the output
+fc8 = fc8.reshape(batch.shape[0], -1)
+clf = svm.SVC()
+clf.fit(fc8, labs)
+clf.decision_function(fc8)
+clf.score(fc8, labs)
 
