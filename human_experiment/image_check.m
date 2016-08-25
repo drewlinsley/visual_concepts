@@ -76,10 +76,13 @@ if computer == '1' % mac keycodes
     respKeys = [54 55]; % 54 = < (yes), 55 = > (no) 
     spacebar = 44;
     escape = 41;
-else % windows keycodes 
+elseif % windows keycodes 
     respKeys = [188 190]; % 188 = < (yes), 190 = > (no) 
     spacebar = 32;
     escape = 27;
+else % linux 
+    
+    
 end
 
 %% General Instructions
