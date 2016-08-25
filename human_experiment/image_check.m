@@ -35,6 +35,7 @@ Screen('TextSize', window, 30);
 Screen('TextFont',window,'Helvetica');
 goodLocation = [xcenter-400,ycenter];
 badLocation = [xcenter+400,ycenter];
+posnegLocation = [xcenter-475,ycenter-300];
 
 [~, ~, ~] = DrawFormattedText(window, 'Preparing the task...' , 'center', 'center', black ); 
 Screen(window, 'Flip');
@@ -61,8 +62,8 @@ for category = 1:numCategories
     start = start + (numConcepts-1);
 end
 
-% divide tasks into three sections (NOTE: the last one (phil's?) is a little 
-% longer than the other two, but only by about ~2 minutes worth of trials)
+% divide tasks into three sections (NOTE: these aren't exactly the same length, but 
+% I think they only differ by a couple minutes each)
 if subjectID == 'c'
     tasks = tasks(1:numConcepts*9,:);
 elseif subjectID == 't'
@@ -116,17 +117,18 @@ for block = 1:length(tasks)
     
     % list filenames for all of the positive and negative images for this task
     for img = 1:5
-        positiveFiles{img,1} = currPositive(img).name;
-        negativeFiles{img,1} = currNegative(img).name;
+        positiveFiles{img+2,1} = currPositive(img+2).name;
+        negativeFiles{img+2,1} = currNegative(img+2).name;
     end
     
-    % column1 lists all filenames for block, column2 = 1 if positive, 2 if negative
-    allBlockFiles = [[positiveFiles;negativeFiles],[repmat(1,length(positiveFiles),1);repmat(2,length(negativeFiles),1)]];
+   % list all filenames for block 
+    allBlockFiles = [positiveFiles(3:end);negativeFiles(3:end)];
+    % 1 = positive, 2 = negative
+    blockPosNeg = [repmat(1,5,1);repmat(2,5,1)];
     
     %% Display block instructions     
     
-    Screen('TextSize',window,textSize);
-    [~,~,~] = DrawFormattedText(window,sprintf('%s + %s',currCategory,currConcept),'center',ycenter-75,black);
+    [~,~,~] = DrawFormattedText(window,sprintf('%s + %s',currCategory,currConcept),'center',ycenter-75,[32,114,220]);
     [~,~,~] = DrawFormattedText(window,'Press < (left) if GOOD, or > (right) if BAD','center','center',black);
     [~,~,~] = DrawFormattedText(window,'Press the spacebar to continue!','center',ycenter+75,black);
     Screen(window,'Flip');
@@ -146,78 +148,102 @@ for block = 1:length(tasks)
     end;
 
     % once spacebar is pressed, display text and move onto experiment
-    [~,~,~] = DrawFormattedText(window,'get ready!','center','center',white);
+    [~,~,~] = DrawFormattedText(window,'get ready!','center','center',black);
     Screen(window,'Flip');
     WaitSecs(3);     
     
     % ------------ save block parameters in 'results' cell array -------- %       
-    results{:,3:4,block} = allBlockFiles; % filenames and positive/negative
-    results{:,1,block} = currCategory; % category name 
-    results{:,2,block} = currConcept; % concept name 
-    results{:,5,block} = repmat((1:5)',2,1); % filenumbers 1-5 (.jpg)   
+    results{block,3} = allBlockFiles; % filenames 
+    results{block,1} = currCategory; % category name 
+    results{block,2} = currConcept; % concept name 
+    results{block,4} = blockPosNeg; % positive/negative
+    results{block,5} = repmat((1:5)',2,1); % filenumbers 1-5 (.jpg)   
     % ------------------------------------------------------------------- %
 
     %% TRIAL LOOP %% 
     % one trial = one image (5 positive --> 5 negative)
     for image = 1:10 
         
+        if image <= 5 % 1:5 = positive 
+            posneg = 'positive';
+        else % 6:10 = negative
+            posneg = 'negative';
+        end
+        
         % load current image and prepare on back buffer 
-        trialImgID = [];
+        trialImgID = sprintf('/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/images/%s/%s/%s/%s',currCategory,currConcept,posneg,allBlockFiles{image});
         trialImg = imread(trialImgID);
         imageTexture = Screen('MakeTexture', window, trialImg);
         Screen('DrawTexture', window, imageTexture, [], [], 0);
 
         % prepare text on back buffer 
-        Screen('TextSize',window,textSize);
         [~,~,~] = DrawFormattedText(window,'good',goodLocation(1),goodLocation(2),black);
         [~,~,~] = DrawFormattedText(window,'bad',badLocation(1),badLocation(2),black); 
         if image <= 5 % images 1:5 = positive
-            [~,~,~] = DrawFormattedText(window,'[positive]',xcenter,ycenter-300,black);
+            [~,~,~] = DrawFormattedText(window,'[positive]',posnegLocation(1),posnegLocation(2),[32,114,220]);
         else % images 6:10 = negative
-            [~,~,~] = DrawFormattedText(window,'[negative]',xcenter,ycenter-300,black);
+            [~,~,~] = DrawFormattedText(window,'[negative]',posnegLocation(1),posnegLocation(2),[32,114,220]);
         end
  
         % show trial stimulus and text
         Screen(window,'Flip');
-        WaitSecs(stimDuration);
+        WaitSecs(3);
 
-        Screen('FillRect', window, white);
+        % record start time 
+        start_time = GetSecs;
+        [~,secs,keycode] = KbCheck; 
 
-        % waits for response (no time limit) 
-        while ((isempty(find(keycode(respKeys))) || length(find(keycode))>1)); 
-            [~,~,keycode] = KbCheck;
+        Screen('FillRect',window,white);
+        flipped = 0;
+
+        % waits for response (3 second time limit) 
+        while isempty(find(keycode(respKeys))) 
+            [~,secs,keycode] = KbCheck;
             WaitSecs(0.001);               
             % close everything if the escape key is pressed 
             if find(keycode)==escape; 
                 Screen('Closeall')
             end          
+            % flip to blank screen, if stimDuration has passed 
+            if ~flipped && (secs-start_time >= 3) 
+                Screen(window,'Flip');
+                flipped = 1;
+            end 
         end
- 
-        % once key has been pressed, flip screen
-        Screen(window,'Flip');
+        
+        % if key is pressed within 3 seconds, flip screen on key press 
+        if flipped == 0  
+            Screen(window,'Flip');
+        end
 
         % record response and present feedback 
         responseMade = find(keycode); 
         if ~isempty(responseMade)  
             if responseMade == respKeys(1)
+                responseScore = 1; % 1 = image is GOOD 
                 [~,~,~] = DrawFormattedText(window,'yay :)','center','center',[17,174,59]);
             elseif responseMade == respKeys(2)
+                responseScore = 0; % 0 = image is BAD 
                 [~,~,~] = DrawFormattedText(window,'nay :(','center','center',[228,25,25]);
-            end
+            end        
+        elseif isempty(responseMade)
+            responseScore = 2; % 2 = NO RESPONSE 
+            [~,~,~] = DrawFormattedText(window,'Respond Faster!','center','center',[228,25,25]);           
         end
-
+        
+        % once key has been pressed, flip screen
         Screen(window,'Flip');
         WaitSecs(0.5); 
 
-        % --------- save trial responses in 'results' cell array -------- % 
-        results{image,4,block} = trialImgID;
-        results{image,5,block} = responseMade;
-        % --------------------------------------------------------------- %        
+        % save trial response in vector containing responses for whole task
+        blockResponses(image,1) = responseScore;
     end   
+     % --------- save block's responses in 'results' cell array ---------- % 
+        results{block,6} = blockResponses;
+    % ------------------------------------------------------------------- %  
 end
 
 %% END OF IMAGE CHECK %% 
-Screen('TextSize',window,textSize);
 [~,~,~] = DrawFormattedText(window,'Phew, all done! Great job, thank you!','center','center',black); 
 Screen(window,'Flip');
 WaitSecs(1.5);
