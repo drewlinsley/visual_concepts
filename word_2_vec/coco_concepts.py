@@ -5,7 +5,7 @@ from pycocotools.coco import COCO
 import string
 
 path = "../../data/"
-num_ex = 50
+num_ex = 5
 train_type = 'cbow'
 
 def make_dir(path):
@@ -90,11 +90,11 @@ for cat in cats:
         path_neg = os.path.join(path_cat, prep[ind], 'negative')
         make_dir(path_pos)
         make_dir(path_neg)
-        with open(os.path.join(path_pos, 'captions_'+prep[ind]+'.txt'), 'wb') as f:
+        with open(os.path.join(path_cat, prep[ind], 'captions_positive_'+prep[ind]+'.txt'), 'wb') as f:
             for cap in reversed(best_caps):
                 f.write(cap['caption'])
                 f.write('\n')
-        with open(os.path.join(path_neg, 'captions_'+prep[ind]+'.txt'), 'wb') as f:
+        with open(os.path.join(path_cat, prep[ind], 'captions_negative_'+prep[ind]+'.txt'), 'wb') as f:
             for cap in worst_caps:
                 f.write(cap['caption'])
                 f.write('\n')
