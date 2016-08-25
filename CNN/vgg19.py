@@ -77,10 +77,10 @@ class Vgg19:
         self.fc7 = self.fc_layer(self.relu6, "fc7")
         self.relu7 = tf.nn.relu(self.fc7)
 
-        self.fc8 = self.fc_layer(self.relu7, "fc8")
+        self.prob = self.fc_layer(self.relu7, "fc8")
 
         # we want to get rid of the fully connected layers
-        #self.prob = tf.nn.softmax(self.fc8, name="prob")
+        # self.prob = tf.nn.softmax(self.fc8, name="prob")
 
         self.data_dict = None
         print("build model finished: %ds" % (time.time() - start_time))
