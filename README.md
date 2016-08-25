@@ -13,7 +13,7 @@
 - sheep 
 - zebra 
 
-* objects*
+*objects*
 - wine glass 
 - vase 
 - TV 
