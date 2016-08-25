@@ -7,7 +7,7 @@ from six.moves import range
 from six.moves.urllib.request import urlretrieve
 from sklearn.manifold import TSNE
 
-text_corpus = 'drew'
+text_corpus = 'text_9'
 
 if text_corpus=='text_9':
     url = 'http://mattmahoney.net/dc/'
@@ -24,7 +24,7 @@ if text_corpus=='text_9':
           'Failed to verify ' + filename + '. Can you get to it with a browser?')
       return filename
     # THIS MIGHT NOT WORK:
-    filename = maybe_download('text9.zip', 322592222)
+    filename = maybe_download('../../data/enwik9.zip', 322592222)
         
     def read_data(filename):
       with zipfile.ZipFile(filename) as f:

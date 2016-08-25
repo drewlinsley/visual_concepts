@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from sklearn import svm
@@ -23,30 +26,34 @@ def load_image(path):
     resized_img = skimage.transform.resize(crop_img, (224, 224))
     return resized_img
 
-path = "/home/tim/data/examples/dog_positive/aboard/"
-imgs_pos = np.array([load_image(os.path.join(path, f)) for f in os.listdir(path)])
-path = "/home/tim/data/examples/dog_negative/aboard/"
-imgs_neg = np.array([load_image(os.path.join(path, f)) for f in os.listdir(path)])
-batch = np.concatenate((imgs_pos, imgs_neg), 0)
-labels = np.concatenate((np.ones((imgs_pos.shape[0], )), np.zeros((imgs_neg.shape[0])))).astype(int)
+lconcepts = ['aboard', 'above', 'across', 'after']
 
-with tf.Session(
-        config=tf.ConfigProto(gpu_options=(tf.GPUOptions(per_process_gpu_memory_fraction=0.7)))) as sess:
-    images = tf.placeholder("float", batch.shape)
-    feed_dict = {images: batch}
-    vgg = vgg19.Vgg19("/home/tim/data/vgg19.npy")
-    with tf.name_scope("content_vgg"):
-        vgg.build(images)
-    fc8 = sess.run(vgg.prob, feed_dict=feed_dict)
-
-skf = StratifiedKFold(labels, 5)
 lscore = []
-for train, test in skf:
-     # train a svm on the output
-    clf = svm.SVC()
-    clf.fit(fc8[train], labels[train])
-    lscore.append(clf.score(fc8[test], labels[test]))
+for concept in lconcepts: 
+    path = "../../data/imgs/dog/aboard/"
+    imgs_pos = np.array([load_image(os.path.join(path, f)) for f in os.listdir(path)])
+    path = "/home/tim/data/examples/dog_negative/aboard/"
+    imgs_neg = np.array([load_image(os.path.join(path, f)) for f in os.listdir(path)])
+    batch = np.concatenate((imgs_pos, imgs_neg), 0)
+    labels = np.concatenate((np.ones((imgs_pos.shape[0], )), np.zeros((imgs_neg.shape[0])))).astype(int)
 
-print(lscore)
-print(np.mean(lscore))
+    with tf.Session(
+            config=tf.ConfigProto(gpu_options=(tf.GPUOptions(per_process_gpu_memory_fraction=0.7)))) as sess:
+        images = tf.placeholder("float", batch.shape)
+        feed_dict = {images: batch}
+        vgg = vgg19.Vgg19("/home/tim/data/vgg19.npy")
+        with tf.name_scope("content_vgg"):
+            vgg.build(images)
+        fc8 = sess.run(vgg.prob, feed_dict=feed_dict)
+
+    skf = StratifiedKFold(labels, 5)
+    lscore = []
+    for train, test in skf:
+         # train a svm on the output
+        clf = svm.SVC()
+        clf.fit(fc8[train], labels[train])
+        lscore.append(clf.score(fc8[test], labels[test]))
+
+    print(lscore)
+    print(np.mean(lscore))
 
