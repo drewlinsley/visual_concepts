@@ -7,7 +7,7 @@ from six.moves import range
 from six.moves.urllib.request import urlretrieve
 from sklearn.manifold import TSNE
 
-text_corpus = 'text_9'
+text_corpus = 'drew'
 
 if text_corpus=='text_9':
     url = 'http://mattmahoney.net/dc/'
@@ -52,7 +52,7 @@ elif text_corpus=='drew':
       return data 
 
     path = "../../data/"
-    name = "text_2.txt"
+    name = "master_clean.txt"
     nb_lines = file_len(os.path.join(path, name))
     words = read_data(os.path.join(path, name), int(1e7), nb_lines)
 

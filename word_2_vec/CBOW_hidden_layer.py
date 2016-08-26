@@ -7,7 +7,7 @@ from six.moves import range
 from six.moves.urllib.request import urlretrieve
 from sklearn.manifold import TSNE
 
-text_corpus = 'text_8'
+text_corpus = 'drew'
 
 if text_corpus=='text_8':
     url = 'http://mattmahoney.net/dc/'
@@ -53,7 +53,7 @@ elif text_corpus=='drew':
       return data 
 
     path = "../../data/"
-    name = "text_2.txt"
+    name = "master_clean.txt"
     nb_lines = file_len(os.path.join(path, name))
     words = read_data(os.path.join(path, name), int(1e7), nb_lines)
     
@@ -240,6 +240,6 @@ def save_dic(dic, path, name):
     with open(os.path.join(path, name), 'wb') as f:
         pickle.dump(dic, f, pickle.HIGHEST_PROTOCOL)
 
-save_dic(dictionary, path, 'dictionary_cbow2')
-save_dic(reverse_dictionary, path, 'reverse_dictionary_cbow2')
-np.save(os.path.join(path, 'embeddings_cbow2.npy'), final_embeddings)
+save_dic(dictionary, path, 'dictionary_cbow_hidden_layer')
+save_dic(reverse_dictionary, path, 'reverse_dictionary_cbow_hidden_layer')
+np.save(os.path.join(path, 'embeddings_cbow_hidden_layer.npy'), final_embeddings)

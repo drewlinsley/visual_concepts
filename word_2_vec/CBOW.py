@@ -7,7 +7,7 @@ from six.moves import range
 from six.moves.urllib.request import urlretrieve
 from sklearn.manifold import TSNE
 
-text_corpus = 'drew'
+text_corpus = 'master'
 
 if text_corpus=='text_9':
     url = 'http://mattmahoney.net/dc/'
@@ -33,7 +33,7 @@ if text_corpus=='text_9':
 
     words = read_data(filename)
 
-elif text_corpus=='drew':
+elif text_corpus=='master':
 
     def file_len(fname):
         with open(fname) as f:
@@ -52,14 +52,15 @@ elif text_corpus=='drew':
       return data 
 
     path = "../../data/"
-    name = "text_2.txt"
+    name = "master_clean.txt"
     nb_lines = file_len(os.path.join(path, name))
-    words = read_data(os.path.join(path, name), int(1e7), nb_lines)
+
+    words = read_data(os.path.join(path, name), int(6e7), nb_lines)
 
 print('Data size %d' % len(words))
 
 # English dictionary 171,476 words + 47,156 obsoletes
-vocabulary_size = 200000
+vocabulary_size = 100000
 #vocabulary_size = 50000
 
 def build_dataset(words):
