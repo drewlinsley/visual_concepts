@@ -1,0 +1,70 @@
+%% Visual Concepts: Manual Image Check - Analysis 
+clc; clear; close all;
+
+%% Load and concatenate results
+
+% -- EDIT FILEPATH AS NEEDED -------------------------------------------- %
+filepath = '/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/data';
+% ----------------------------------------------------------------------- %
+
+list = dir(sprintf('%s/*.mat', filepath));
+% NOTE: requires all three results files (c.mat,t.mat,p.mat)
+pt1 = load(strcat(filepath,'/',list(1).name),'results');
+pt2 = load(strcat(filepath,'/',list(2).name),'results');
+pt3 = load(strcat(filepath,'/',list(3).name),'results');
+
+data = [pt1.results; pt2.results; pt3.results];
+
+% -- 'DATA' CONTENTS ---------------------------------------------------- % 
+% column 1 = category name (ex. 'backpack')
+% column 2 = concept name (ex. 'aboard')
+% column 3 = image filename (ex. '0.jpg')
+% column 4 = positive/negative ID (1 = positive, 2 = negative)
+% column 5 = image index 1-5 (ex. '3' for 3rd image in positive set of 5)
+% column 6 = response score (1 = good, 0 = bad)
+% ----------------------------------------------------------------------- % 
+
+%% Categories 
+
+% average response scores across all concepts within each category
+index = 1;
+for i = 1:12:length(data) 
+    for j = 1:12 
+        if (i + (j-1)) <= 117
+            conceptMeans(j,1) = nanmean(data{i+(j-1),6});            
+        end        
+    end
+    allConceptMeans(:,index) = conceptMeans; % row = concept, column = category
+    categoryMeans{index,1} = data{i,1};
+    categoryMeans{index,2} = nanmean(conceptMeans);
+    index = index + 1;
+end
+
+categoryMeansMat = [(1:length(categoryMeans))',cell2mat(categoryMeans(:,2))];
+categoryMeansMat = sortrows(categoryMeansMat,2);
+
+figure()
+bar(categoryMeansMat(:,2));
+xlabel('Category'); ylabel('% "Good" Rating');
+set(gca,'XTick',1:length(categoryMeansMat),'XTickLabel',categoryMeans(categoryMeansMat(:,1),1)');
+
+%% Concepts 
+
+% within each category, show means for each concept 
+figure()
+xlabel('Concept'); ylabel('% "Good" Rating');
+for category = 1:length(categoryMeans)
+    subplot(2,5,category);
+    bar(allConceptMeans(:,category));
+    title(categoryMeans(category,1));      
+    set(gca,'XTick',1:length(allConceptMeans));
+end
+    
+% means for each concept, averaged across categories 
+betweenCat_conceptMeans = [(1:length(allConceptMeans))',nanmean(allConceptMeans,2)];
+betweenCat_conceptMeans = sortrows(betweenCat_conceptMeans,2);
+
+figure()
+bar(betweenCat_conceptMeans(:,2));
+xlabel('Concept'); ylabel('% "Good" Rating');
+set(gca,'XTick',1:length(betweenCat_conceptMeans),'XTickLabel',data(1:12,2));    
