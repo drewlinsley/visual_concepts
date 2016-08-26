@@ -167,7 +167,7 @@ skip_window = 4 # How many words to consider left and right.
 valid_size = 16 # Random set of words to evaluate similarity on.
 valid_window = 100 # Only pick dev samples in the head of the distribution.
 valid_examples = np.array(random.sample(range(valid_window), valid_size))
-num_sampled = 64 # Number of negative examples to sample.
+num_sampled = 13 # Number of negative examples to sample.
 
 graph = tf.Graph()
 
