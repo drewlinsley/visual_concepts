@@ -45,9 +45,9 @@ WaitSecs(1);
 %% Create three sets of tasks 
 
 % -- EDIT FILEPATHS ----------------------------------------------------- % 
-categoryFolders = '/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/images';
-sampleCategory = '/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/images/backpack';
-instructPath = '/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/check-instructions.jpg';
+categoryFolders = '/.../images';
+sampleCategory = '/.../images/backpack';
+instructPath = '/.../check-instructions.jpg';
 % ----------------------------------------------------------------------- % 
 
 addpath(categoryFolders);
@@ -111,9 +111,9 @@ for block = 1:length(tasks)
     
     % get strings representing five positive and five negative images within the current task
     % -- EDIT FILEPATHS ------------------------------------------------- %
-    posPath = sprintf('/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/images/%s/%s/positive',currCategory,currConcept);
+    posPath = sprintf('/.../images/%s/%s/positive',currCategory,currConcept);
     posDir = dir(posPath);    
-    negPath = sprintf('/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/images/%s/%s/negative',currCategory,currConcept);
+    negPath = sprintf('/.../images/%s/%s/negative',currCategory,currConcept);
     negDir = dir(negPath); 
     % ------------------------------------------------------------------- %
     
@@ -171,7 +171,9 @@ for block = 1:length(tasks)
         end
         
         % load current image and prepare on back buffer 
-        trialImgID = sprintf('/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/images/%s/%s/%s/%s',currCategory,currConcept,posneg,allBlockFiles{image});
+        % -- EDIT FILEPATH ---------------------------------------------- %
+        trialImgID = sprintf('/.../images/%s/%s/%s/%s',currCategory,currConcept,posneg,allBlockFiles{image});
+         % --------------------------------------------------------------- % 
         trialImg = imread(trialImgID);
         imageTexture = Screen('MakeTexture', window, trialImg);
         Screen('DrawTexture', window, imageTexture, [], [], 0);
@@ -249,8 +251,8 @@ end
 Screen(window,'Flip');
 WaitSecs(1.5);
 
-% -- EDIT FILEPATH AS NECESSARY (saves 'results' struct to file) -------- %
-save(fullfile('/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning','data', sprintf('%s.mat',subjectID)),'results.mat');
+% -- EDIT FILEPATH AS NECESSARY (saves 'results' cell array to file) ---- %
+save(fullfile('...','data', sprintf('%s.mat',subjectID)),'results.mat');
 % ----------------------------------------------------------------------- %
 
 Screen('Closeall') 
