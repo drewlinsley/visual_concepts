@@ -4,7 +4,7 @@ clc; clear; close all;
 %% Load and concatenate results
 
 % -- EDIT FILEPATH AS NEEDED -------------------------------------------- %
-filepath = '/Users/Celia/Documents/Brown Semester 7/Deep Learning/visual_reasoning/data';
+filepath = '/.../data';
 % ----------------------------------------------------------------------- %
 
 list = dir(sprintf('%s/*.mat', filepath));
