@@ -1,26 +1,13 @@
-"""from __future__ import print_function
+from __future__ import print_function
 import collections, math, os, random, zipfile, string, pickle
 import numpy as np
 import tensorflow as tf
 from matplotlib import pylab
 from six.moves import range
 from six.moves.urllib.request import urlretrieve
-from sklearn.manifold import TSNE"""
-%matplotlib inline
-from __future__ import print_function
-import collections
-import math
-import numpy as np
-import os
-import random
-import tensorflow as tf
-import zipfile
-from matplotlib import pylab
-from six.moves import range
-from six.moves.urllib.request import urlretrieve
 from sklearn.manifold import TSNE
 
-text_corpus = 'text_8'
+text_corpus = 'drew'
 
 if text_corpus=='text_8':
     url = 'http://mattmahoney.net/dc/'
@@ -66,7 +53,7 @@ elif text_corpus=='drew':
       return data 
 
     path = "../../data/"
-    name = "text_2.txt"
+    name = "master_clean.txt"
     nb_lines = file_len(os.path.join(path, name))
     words = read_data(os.path.join(path, name), int(1e7), nb_lines)
     
@@ -256,6 +243,6 @@ def save_dic(dic, path, name):
     with open(os.path.join(path, name), 'wb') as f:
         pickle.dump(dic, f, pickle.HIGHEST_PROTOCOL)
 
-save_dic(dictionary, path, 'dictionary_cbow')
-save_dic(reverse_dictionary, path, 'reverse_dictionary_cbow')
-np.save(os.path.join(path, 'embeddings_cbow.npy'), final_embeddings)
+save_dic(dictionary, path, 'dictionary_one_layer_sampling')
+save_dic(reverse_dictionary, path, 'reverse_dictionary_one_layer_sampling')
+np.save(os.path.join(path, 'embeddings_one_layer_sampling.npy'), final_embeddings)

@@ -33,15 +33,15 @@ llabs = []
 for concept in prep:
     print(concept)
     for category in os.listdir(os.path.join(path_dat, "imgs")): 
-        path_pos = os.path.join("../../data/imgs_master_reduced/", category, concept, "positive")
+        path_pos = os.path.join("../../data/imgs/", category, concept, "positive")
         limgs.extend([load_image(os.path.join(path_pos, f)) for f in os.listdir(path_pos)])
-        path_neg = os.path.join("../../data/imgs_master_reduced/", category, concept, "negative")
+        path_neg = os.path.join("../../data/imgs/", category, concept, "negative")
         limgs.extend([load_image(os.path.join(path_neg, f)) for f in os.listdir(path_neg)])
-        labels = np.concatenate((np.ones((len(os.listdir(path_pos)), )), np.zeros((len(os.listdir(path_neg)), )))).astype(int)
+        llabs.extend(np.concatenate((np.ones((len(os.listdir(path_pos)), )), np.zeros((len(os.listdir(path_neg)), )))).astype(int))
 limgs = np.array(limgs)
 labels = np.array(llabs)
 
-batch_size = 60
+batch_size = 50
 lfc8 = []
 with tf.Session(
         config=tf.ConfigProto(gpu_options=(tf.GPUOptions(per_process_gpu_memory_fraction=0.95)))) as sess:
@@ -56,4 +56,5 @@ with tf.Session(
         lfc8.append(sess.run(vgg.prob, feed_dict=feed_dict))
 
 np.save(os.path.join(path_dat, 'output_vgg19.npy'), np.array(lfc8))
+np.save(os.path.join(path_dat, 'labels_vgg19.npy'), np.array(labels))
 
