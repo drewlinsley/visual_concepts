@@ -144,14 +144,14 @@ for skip_window in [2, 1]:
     print('    batch:', [map(lambda x:reverse_dictionary[x],bi) for bi in batch])
     print('    labels:', [reverse_dictionary[li] for li in labels.reshape(8)])
 
-batch_size = 64
-embedding_size = 64 
-skip_window = 2 # How many words to consider left and right.
+batch_size = 128
+embedding_size = 128 
+skip_window = 6 # How many words to consider left and right.
 valid_size = 16 # Random set of words to evaluate similarity on.
 valid_window = 100 # Only pick dev samples in the head of the distribution.
 valid_examples = np.array(random.sample(range(valid_window), valid_size))
-num_sampled = 64 # Number of negative examples to sample.
-hidden_size = 32
+num_sampled = 13 # Number of negative examples to sample.
+hidden_size = 64
 
 graph = tf.Graph()
 
@@ -167,24 +167,30 @@ with graph.as_default(): #, tf.device('/cpu:0'):
     tf.random_uniform([vocabulary_size, embedding_size], -1.0, 1.0))
 
   hidden_weights = tf.Variable(
-    tf.truncated_normal([embedding_size*skip_window*2, hidden_size],
-                         stddev=1.0 / math.sqrt(embedding_size)))
+    tf.truncated_normal([embedding_size, hidden_size],
+                         stddev=.1 / math.sqrt(embedding_size)))
   hidden_biases = tf.Variable(tf.zeros([hidden_size]))
   
   softmax_weights = tf.Variable(
     tf.truncated_normal([vocabulary_size, hidden_size],
-                         stddev=1.0 / math.sqrt(hidden_size)))
+                         stddev=.1 / math.sqrt(hidden_size)))
   softmax_biases = tf.Variable(tf.zeros([vocabulary_size]))
   # Model.
   # Look up embeddings for inputs.
-  embed = tf.reshape(tf.nn.embedding_lookup(embeddings, train_dataset),[batch_size,embedding_size*skip_window*2])
+  embed = tf.reduce_mean(tf.nn.embedding_lookup(embeddings, train_dataset),1)
   # compute hidden layer
   embed2 = tf.nn.relu(tf.matmul(embed,hidden_weights)+hidden_biases)
-    
+  target_words=['above','behind','below','between','beyond','inside', \
+                'near','outside','over','under','upon','with','within'] 
+  target_words=map(lambda x:dictionary[x],target_words)
+  target_matrix=[]
+  for i in range(batch_size):
+    target_matrix.append(target_words)
   # Compute the softmax loss, using a sample of the negative labels each time.
+  target_samples = tf.nn.uniform_candidate_sampler(target_matrix,13,13,True,13)
   loss = tf.reduce_mean(
     tf.nn.sampled_softmax_loss(softmax_weights, softmax_biases, embed2,
-                               train_labels, num_sampled, vocabulary_size))
+                               train_labels, num_sampled, vocabulary_size, sampled_values=target_samples))
 
   # Optimizer.
   # Note: The optimizer will optimize the softmax_weights AND the embeddings.
@@ -192,7 +198,7 @@ with graph.as_default(): #, tf.device('/cpu:0'):
   # optimizer's `minimize` method will by default modify all variable quantities 
   # that contribute to the tensor it is passed.
   # See docs on `tf.train.Optimizer.minimize()` for more details.
-  optimizer = tf.train.AdagradOptimizer(1.0).minimize(loss)
+  optimizer = tf.train.AdagradOptimizer(.1).minimize(loss)
   
   # Compute the similarity between minibatch examples and all embeddings.
   # We use the cosine distance:
@@ -203,7 +209,7 @@ with graph.as_default(): #, tf.device('/cpu:0'):
   similarity = tf.matmul(valid_embeddings, tf.transpose(normalized_embeddings))
 
 
-num_steps = 200001
+num_steps = 100001
 
 with tf.Session(graph=graph) as session:
   tf.initialize_all_variables().run()
