@@ -9,7 +9,7 @@ rng('default'); rng('shuffle');
 % the command window (after installing psychtoolbox) to check which
 % keycodes match the spacebar, escape key, '<', and '>'. You can then
 % manually enter those codes in the script later. 
-computer = input('1 = mac, 2 = windows: ','s');
+computer = input('1 = mac, 2 = windows, 3 = linux :','s');
 
 % Each of us gets a different 1/3 chunk of the images! 
 subjectID = input('Enter your first initial (lowercase): ','s');
@@ -18,7 +18,7 @@ subjectID = input('Enter your first initial (lowercase): ','s');
 screenSize = input('Full Screen Mode (0/1): '); 
 
 %% Display welcome screen while task is prepared
-Screen('Preference', 'SkipSyncTests', 1)
+Screen('Preference', 'SkipSyncTests', 2)
 whichscreen = 0;
 smallScreen = [0 0 1000 750]; 
 switch screenSize
@@ -45,9 +45,9 @@ WaitSecs(1);
 %% Create three sets of tasks 
 
 % -- EDIT FILEPATHS ----------------------------------------------------- % 
-categoryFolders = '/.../images';
-sampleCategory = '/.../images/backpack';
-instructPath = '/.../check-instructions.jpg';
+categoryFolders = '/home/tim/data/examples/imgs_master_reduced/';
+sampleCategory = '/home/tim/data/examples/imgs_master_reduced/backpack';
+instructPath = 'check-instructions.jpg';
 % ----------------------------------------------------------------------- % 
 
 addpath(categoryFolders);
@@ -78,10 +78,14 @@ if computer == '1' % mac keycodes
     respKeys = [54 55]; % 54 = < (yes), 55 = > (no) 
     spacebar = 44;
     escape = 41;
-else % windows keycodes 
+elseif computer == '2'% windows keycodes 
     respKeys = [188 190]; % 188 = < (yes), 190 = > (no) 
     spacebar = 32;
     escape = 27;
+elseif computer == '3'% linux 
+    respKeys = [60 61]; % 188 = < (yes), 190 = > (no) 
+    spacebar = 66;
+    escape = 10;   
 end
 
 %% General Instructions
@@ -111,9 +115,9 @@ for block = 1:length(tasks)
     
     % get strings representing five positive and five negative images within the current task
     % -- EDIT FILEPATHS ------------------------------------------------- %
-    posPath = sprintf('/.../images/%s/%s/positive',currCategory,currConcept);
+    posPath = sprintf('/home/tim/data/examples/imgs_master_reduced/%s/%s/positive',currCategory,currConcept);
     posDir = dir(posPath);    
-    negPath = sprintf('/.../images/%s/%s/negative',currCategory,currConcept);
+    negPath = sprintf('/home/tim/data/examples/imgs_master_reduced/%s/%s/negative',currCategory,currConcept);
     negDir = dir(negPath); 
     % ------------------------------------------------------------------- %
     
@@ -172,7 +176,7 @@ for block = 1:length(tasks)
         
         % load current image and prepare on back buffer 
         % -- EDIT FILEPATH ---------------------------------------------- %
-        trialImgID = sprintf('/.../images/%s/%s/%s/%s',currCategory,currConcept,posneg,allBlockFiles{image});
+        trialImgID = sprintf('/home/tim/data/examples/imgs_master_reduced/%s/%s/%s/%s',currCategory,currConcept,posneg,allBlockFiles{image});
          % --------------------------------------------------------------- % 
         trialImg = imread(trialImgID);
         imageTexture = Screen('MakeTexture', window, trialImg);
@@ -252,7 +256,7 @@ Screen(window,'Flip');
 WaitSecs(1.5);
 
 % -- EDIT FILEPATH AS NECESSARY (saves 'results' cell array to file) ---- %
-save(fullfile('...','data', sprintf('%s.mat',subjectID)),'results.mat');
+save(fullfile('/home/tim/data/examples/res_matlab/', sprintf('%s.mat',subjectID)),'results');
 % ----------------------------------------------------------------------- %
 
 Screen('Closeall') 
