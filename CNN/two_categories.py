@@ -16,16 +16,16 @@ lran = np.zeros((len(prep), 100))
 lscore = np.zeros((len(prep), )) 
 for icon, concept in enumerate(prep):
     print(concept)
-    cat1 = 0
+    cat1 = 8 
     print(cats[cat1])
-    cat2 = 1
+    cat2 = 17 
     print(cats[cat2])
-    Xtrain = lfc8[icon*(len(cats)*nb_img)+icat1*nb_img:(icon)*(len(cats)*nb_img)+(icat1+1)*nb_img]
-    Xtest = lfc8[icon*(len(cats)*nb_img)+icat2*nb_img:(icon)*(len(cats)*nb_img)+(icat2+1)*nb_img]
-    ytrain = np.hstack((np.ones((nb_img, )), np.zeros((nb_img,)))) 
-    ytest = np.hstack((np.ones((nb_img, )), np.zeros((nb_img,)))) 
+    Xtrain = lfc8[icon*(len(cats)*nb_img)+cat1*nb_img:(icon)*(len(cats)*nb_img)+(cat1+1)*nb_img]
+    Xtest = lfc8[icon*(len(cats)*nb_img)+cat2*nb_img:(icon)*(len(cats)*nb_img)+(cat2+1)*nb_img]
+    ytrain = np.hstack((np.ones((nb_img/2, )), np.zeros((nb_img/2,)))) 
+    ytest = np.hstack((np.ones((nb_img/2, )), np.zeros((nb_img/2,)))) 
     # true scores
-    skf = StratifiedKFold(y, 5)
+    skf = StratifiedKFold(ytrain, 5)
     true_score = []
     for train, test in skf:
          # train a svm on the output
@@ -35,8 +35,8 @@ for icon, concept in enumerate(prep):
     print(np.mean(true_score))
     lscore[icon] = np.mean(true_score)
     for i in range(100):
-        np.random.shuffle(y)
-        skf = StratifiedKFold(y, 5)
+        np.random.shuffle(ytrain)
+        skf = StratifiedKFold(ytrain, 5)
         ran_score = []
         for train, test in skf:
              # train a svm on the output

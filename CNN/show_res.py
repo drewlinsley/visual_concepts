@@ -59,6 +59,7 @@ plt.savefig('../../data/fig/'+ 'matrix_across_plot.png')
 ## swarmplots across categories
 lran = np.load(os.path.join("../../data/res/", "across_cat_lran.npy"))
 lscore = np.load(os.path.join("../../data/res/", "across_cat_score.npy"))
+pval = np.round((np.sum(lscore[:, :, np.newaxis]>lran, axis=2)+1)/(lran.shape[2]+1.), 3)
 plt.figure()
 sns.set_style("whitegrid")
 ax2 = sns.swarmplot(data=lran.T, zorder=1)
@@ -72,14 +73,15 @@ plt.savefig('../../data/fig/across_categories_swarmplot.png')
 ## swarmplots for two categories
 lran = np.load(os.path.join("../../data/res/", "two_cat_lran.npy"))
 lscore = np.load(os.path.join("../../data/res/", "two_cat_score.npy"))
+pval = np.round((np.sum(lscore[:, np.newaxis]>lran, axis=1)+1)/(lran.shape[1]+1.), 3)
 plt.figure()
 sns.set_style("whitegrid")
 ax2 = sns.swarmplot(data=lran.T, zorder=1)
 ax1 = plt.scatter(range(lscore.shape[0]), lscore, color='r', zorder=2)
 plt.xticks(range(len(prep)), prep, rotation='40')
-plt.title('Two categories: a and b')
+plt.title('Two categories: bear and giraffe')
 for icon, con in enumerate(prep):
-    plt.text(icon-0.3, ax2.get_ylima
+    plt.text(icon-0.3, ax2.get_ylim()[1]-0.02, pval[icon], rotation=30)
 plt.savefig('../../data/fig/two_categories_swarmplot.png')
 
 # multiple bivariate kde all

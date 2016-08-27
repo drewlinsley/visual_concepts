@@ -5,8 +5,8 @@ from pycocotools.coco import COCO
 import string
 
 path = "../../data/"
-num_ex = 5
-train_type = 'cbow_targeted_sampling'
+num_ex = 100 
+train_type = 'cbow'
 
 def make_dir(path):
     try:
@@ -36,6 +36,11 @@ elif train_type=='cbow_targeted_sampling':
     emb = np.load(os.path.join(path, "embeddings_cbow_targeted_sampling.npy"))
     dic = load_dic(path, 'dictionary_cbow_targeted_sampling')
     rdic = load_dic(path, 'reverse_dictionary_cbow_targeted_sampling')
+elif train_type=='one_layer_targeted_sampling':
+    emb = np.load(os.path.join(path, "embeddings_one_layer_sampling.npy"))
+    dic = load_dic(path, 'dictionary_one_layer_sampling')
+    rdic = load_dic(path, 'reverse_dictionary_one_layer_sampling')
+
 
 
 
@@ -51,10 +56,12 @@ emb_cpt = emb[word_index]
 coco_caps = COCO(os.path.join(path, 'coco', 'annotations', 'captions_train2014.json'))
 coco_anns = COCO(os.path.join(path, 'coco', 'annotations', 'instances_train2014.json'))
 
-lcats = ['bear', 'bird', 'cat', 'cow', 'giraffe', 'elephant', 'dog', 'horse',
-         'mouse', 'sheep', 'zebra', 'wine glass', 'vase', 'TV', 'toaster', 
-         'suitcase', 'scissors', 'potted plant', 'microwave', 'laptop', 'hand bag',
-         'hairdryer', 'cup', 'couch', 'chair', 'bottle', 'book', 'backpack'] 
+#lcats = ['bear', 'bird', 'cat', 'cow', 'giraffe', 'elephant', 'dog', 'horse',
+#         'mouse', 'sheep', 'zebra', 'wine glass', 'vase', 'TV', 'toaster', 
+#         'suitcase', 'scissors', 'potted plant', 'microwave', 'laptop', 'hand bag',
+#         'hairdryer', 'cup', 'couch', 'chair', 'bottle', 'book', 'backpack'] 
+lcats = ['bear', 'giraffe', 'elephant', 'horse', 'zebra'] 
+
 
 cats = coco_anns.getCatIds(catNms=lcats)
 cats_name = coco_anns.loadCats(cats)

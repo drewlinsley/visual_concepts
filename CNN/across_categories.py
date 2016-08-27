@@ -17,7 +17,7 @@ lscore = np.zeros((len(prep), ))
 for icon, concept in enumerate(prep):
     print(concept)
     X = lfc8[icon*(len(cats)*nb_img):(icon+1)*(len(cats)*nb_img)]
-    y = np.tile(np.hstack((np.ones((nb_img, )), np.zeros((nb_img,)))), len(prep)) 
+    y = np.tile(np.hstack((np.ones((nb_img/2, )), np.zeros((nb_img/2,)))), len(cats)) 
     # true scores
     skf = StratifiedKFold(y, 5)
     true_score = []
