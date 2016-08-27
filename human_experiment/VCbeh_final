@@ -290,7 +290,7 @@ Screen(window,'Flip');
 WaitSecs(1.5);
 
 % -- EDIT FILEPATH AS NECESSARY (saves 'results' struct to file) -------- %
-save(fullfile('...','data',sprintf('%.mat',results.subjectID)),'-struct','results');
+save(sprintf('/.../%s',results.subjectID),'-struct','results')
 % ----------------------------------------------------------------------- %
 
 Screen('Closeall') 
