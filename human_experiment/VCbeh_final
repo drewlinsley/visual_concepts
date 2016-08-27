@@ -62,6 +62,8 @@ sampleconceptPath = '/.../final_images/bear';
 instructPath = '/.../instructions.jpg';
 % ----------------------------------------------------------------------- % 
 
+addpath(categoryPath,sampleconceptPath,instructPath);
+
 % numBlocks = # concepts, numTrials = # images per concept
 % NOTE: a 'block' is a concept task (ex. 'is the dog within, y/n?')
 numBlocks = 10; 
