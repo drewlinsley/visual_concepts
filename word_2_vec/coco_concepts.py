@@ -6,7 +6,7 @@ import string
 
 path = "../../data/"
 num_ex = 5
-train_type = 'cbow'
+train_type = 'cbow_targeted_sampling'
 
 def make_dir(path):
     try:
@@ -28,6 +28,16 @@ elif train_type=='cbow':
     emb = np.load(os.path.join(path, "embeddings_cbow.npy"))
     dic = load_dic(path, 'dictionary_cbow')
     rdic = load_dic(path, 'reverse_dictionary_cbow')
+elif train_type=='cbow2':
+    emb = np.load(os.path.join(path, "embeddings_cbow2.npy"))
+    dic = load_dic(path, 'dictionary_cbow2')
+    rdic = load_dic(path, 'reverse_dictionary_cbow2')
+elif train_type=='cbow_targeted_sampling':
+    emb = np.load(os.path.join(path, "embeddings_cbow_targeted_sampling.npy"))
+    dic = load_dic(path, 'dictionary_cbow_targeted_sampling')
+    rdic = load_dic(path, 'reverse_dictionary_cbow_targeted_sampling')
+
+
 
 # Find embedding for chosen concepts
 prep = np.loadtxt('../prob_word_lists/reduced_prepositions.csv', type('str'))
