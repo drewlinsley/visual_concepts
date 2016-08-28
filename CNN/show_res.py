@@ -57,7 +57,10 @@ mask = np.zeros_like(score, dtype=np.bool)
 mask[np.triu_indices_from(mask)] = True
 cmap = sns.diverging_palette(220, 10, as_cmap=True)
 
+# with matrices
 cat = 0
+score = np.load(os.path.join("../../data/res/", cats[cat]+"_across_score.npy"))
+ran = np.load(os.path.join("../../data/res/", cats[cat]+"_across_lran.npy"))
 fig = plt.figure()
 fig.text(0.5, 0.55, cats[cat], fontsize='20')
 ax = sns.heatmap(score, mask=mask, cmap=cmap)
