@@ -10,7 +10,7 @@ labels = np.load(os.path.join(path_dat, 'labels_vgg19.npy'))
 nb_img = 100 
 
 prep = np.loadtxt('../prob_word_lists/reduced_prepositions.csv', type('str'))
-cats = os.listdir(os.path.join(path_dat, "imgs"))
+cats = np.loadtxt(os.path.join(path_dat, "categories.txt"), type('str'))
 
 lran = np.zeros((len(prep), 100)) 
 lscore = np.zeros((len(prep), )) 
@@ -38,7 +38,7 @@ for icon, concept in enumerate(prep):
             clf.fit(X[train], y[train])
             ran_score.append(clf.score(X[test], y[test]))
         lran[icon, i] = np.mean(ran_score)
-np.save(os.path.join("../../data/res/", "across_cat_lran.npy"), lran)
-np.save(os.path.join("../../data/res/", "across_cat_score.npy"), lscore)
+np.save(os.path.join("../../data/res/", "across_all_cat_lran.npy"), lran)
+np.save(os.path.join("../../data/res/", "across_all_cat_score.npy"), lscore)
 
 

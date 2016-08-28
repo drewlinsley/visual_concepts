@@ -16,9 +16,9 @@ lran = np.zeros((len(prep), 100))
 lscore = np.zeros((len(prep), )) 
 for icon, concept in enumerate(prep):
     print(concept)
-    cat1 = 8 
+    cat1 = 0 
     print(cats[cat1])
-    cat2 = 17 
+    cat2 = 2 
     print(cats[cat2])
     Xtrain = lfc8[icon*(len(cats)*nb_img)+cat1*nb_img:(icon)*(len(cats)*nb_img)+(cat1+1)*nb_img]
     Xtest = lfc8[icon*(len(cats)*nb_img)+cat2*nb_img:(icon)*(len(cats)*nb_img)+(cat2+1)*nb_img]
@@ -44,7 +44,7 @@ for icon, concept in enumerate(prep):
             clf.fit(Xtrain[train], ytrain[train])
             ran_score.append(clf.score(Xtest[test], ytest[test]))
         lran[icon, i] = np.mean(ran_score)
-np.save(os.path.join("../../data/res/", "two_cat_lran.npy"), lran)
-np.save(os.path.join("../../data/res/", "two_cat_score.npy"), lscore)
+np.save(os.path.join("../../data/res/", "b_h_cat_lran.npy"), lran)
+np.save(os.path.join("../../data/res/", "b_h_cat_score.npy"), lscore)
 
 

@@ -28,11 +28,12 @@ def load_image(path):
 
 path_dat = "../../data"
 prep = np.loadtxt('../prob_word_lists/reduced_prepositions.csv', type('str'))
+cats = np.loadtxt(os.path.join(path_dat, 'categories.txt'), type('str'))
 limgs = []
 llabs = []
 for concept in prep:
     print(concept)
-    for category in os.listdir(os.path.join(path_dat, "imgs")): 
+    for category in cats: 
         path_pos = os.path.join("../../data/imgs/", category, concept, "positive")
         limgs.extend([load_image(os.path.join(path_pos, f)) for f in os.listdir(path_pos)])
         path_neg = os.path.join("../../data/imgs/", category, concept, "negative")

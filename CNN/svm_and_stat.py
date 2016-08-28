@@ -10,7 +10,7 @@ labels = np.load(os.path.join(path_dat, 'labels_vgg19.npy'))
 nb_img = 100 
 
 prep = np.loadtxt('../prob_word_lists/reduced_prepositions.csv', type('str'))
-cats = os.listdir(os.path.join(path_dat, "imgs"))
+cats = np.loadtxt(os.path.join(path_dat, "categories.txt"), type('str'))
 
 lran = []
 lscore = []

@@ -10,7 +10,7 @@ labels = np.load(os.path.join(path_dat, 'labels_vgg19.npy'))
 nb_img = 50 
 
 prep = np.loadtxt('../prob_word_lists/reduced_prepositions.csv', type('str'))
-cats = os.listdir(os.path.join(path_dat, "imgs"))
+cats = np.loadtxt(os.path.join(path_dat, "categories.txt"), type('str'))
 
 lran = np.zeros((len(prep), len(prep), 100)) 
 lscore = np.zeros((len(prep), len(prep))) 
@@ -18,7 +18,7 @@ for icon, concepti in enumerate(prep):
     for jcon, conceptj in enumerate(prep):
         print(concepti)
         print(conceptj)
-        icat = 8
+        icat = 2
         category = cats[icat]
         print(category)
         Xi = lfc8[icon*(len(cats)*nb_img)+icat*nb_img:(icon)*(len(cats)*nb_img)+(icat+1)*nb_img]

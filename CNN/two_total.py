@@ -6,11 +6,12 @@ import os, copy
 
 path_dat = "../../data"
 prep = np.loadtxt('../prob_word_lists/reduced_prepositions.csv', type('str'))
-cats = os.listdir(os.path.join(path_dat, "imgs"))
+cats = np.loadtxt(os.path.join(path_dat, "categories.txt"), type('str'))
 lfc8 = np.load(os.path.join(path_dat, 'output_vgg19.npy')).reshape(len(prep), len(cats), 100, 1000)
 labels = np.load(os.path.join(path_dat, 'labels_vgg19.npy')).reshape(len(prep), len(cats), 100)
 nb_img = 100 
 
+# fewer categories 
 lran = np.zeros((len(prep), len(cats), len(cats), 100)) 
 lscore = np.zeros((len(prep), len(cats), len(cats))) 
 for icon, concepti in enumerate(prep):
@@ -38,7 +39,7 @@ for icon, concepti in enumerate(prep):
                 skf = StratifiedKFold(ytrain, 5)
                 ran_score = []
                 for train, test in skf:
-                     # train a svm on the output
+                    # train a svm on the output
                     clf = svm.SVC()
                     clf.fit(Xtrain[train], ytrain[train])
                     ran_score.append(clf.score(Xtest[test], ytest[test]))
