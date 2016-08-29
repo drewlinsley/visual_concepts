@@ -4,6 +4,10 @@ from sklearn.cross_validation import StratifiedKFold
 from sklearn import svm
 import os, copy
 
+"""
+training on one category and testing on another one, for all possible pairs of category
+"""
+
 path_dat = "../../data"
 prep = np.loadtxt('../prob_word_lists/reduced_prepositions.csv', type('str'))
 cats = np.loadtxt(os.path.join(path_dat, "categories.txt"), type('str'))
@@ -12,8 +16,7 @@ labels = np.load(os.path.join(path_dat, 'labels_vgg19.npy')).reshape(len(prep), 
 nb_img = 100 
 
 # fewer categories 
-lran = np.zeros((len(prep), len(cats), len(cats), 100)) 
-lscore = np.zeros((len(prep), len(cats), len(cats))) 
+lran, lscore = [], [] 
 for icon, concepti in enumerate(prep):
     print(concepti)
     for icat, categoryi in enumerate(cats):
@@ -31,20 +34,17 @@ for icon, concepti in enumerate(prep):
                  # train a svm on the output
                 clf = svm.SVC()
                 clf.fit(Xtrain[train], ytrain[train])
-                true_score.append(clf.score(Xtest[test], ytest[test]))
-            print(np.mean(true_score))
-            lscore[icon, icat, jcat] = np.mean(true_score)
-            for i in range(100):
-                np.random.shuffle(ytrain)
-                skf = StratifiedKFold(ytrain, 5)
-                ran_score = []
-                for train, test in skf:
-                    # train a svm on the output
-                    clf = svm.SVC()
-                    clf.fit(Xtrain[train], ytrain[train])
-                    ran_score.append(clf.score(Xtest[test], ytest[test]))
-                lran[icon, icat, jcat, i] = np.mean(ran_score)
-np.save(os.path.join("../../data/res/", "all_across_lran.npy"), lran)
-np.save(os.path.join("../../data/res/", "all_across_score.npy"), lscore)
+                lscore.append(clf.score(Xtest[test], ytest[test]))
+                ytestran = copy.deepcopy(ytest)[test] 
+                for i in range(Xtrain.shape[0]):
+                    np.random.shuffle(ytestran)
+                    lran.append(clf.score(Xtest[test], ytestran))
+
+lran = np.array(lran).reshape((len(prep), len(cats), len(cats), -1, Xtrain.shape[0]))
+lscore = np.array(lscore).reshape((len(prep), len(cats), len(cats), -1))
+ran = np.mean(lran, 3)
+score = np.mean(lscore, 3)
+np.save(os.path.join("../../data/res/", "train_test_different_categories_all_ran.npy"), ran)
+np.save(os.path.join("../../data/res/", "train_test_different_categories_all_score.npy"), score)
 
 
